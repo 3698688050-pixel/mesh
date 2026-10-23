@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="目数换算">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme:light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme:dark)">
+<title>目数 ↔ 微米</title>
+<style>
+  :root{
+    --bg:#f2f2f7; --card:#fff; --text:#000; --sub:#8a8a8e;
+    --line:rgba(60,60,67,.12); --accent:#007aff;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#000; --card:#1c1c1e; --text:#fff; --sub:#8e8e93;
+      --line:rgba(255,255,255,.13); --accent:#0a84ff;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text); min-height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Helvetica Neue",sans-serif;
+    -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
+    padding:calc(env(safe-area-inset-top) + 22px) 16px calc(env(safe-area-inset-bottom) + 36px);
+  }
+  .wrap{max-width:480px;margin:0 auto;}
+
+  /* 标题 */
+  .hd{padding:0 4px 18px;}
+  .hd h1{margin:0;font-size:27px;font-weight:700;letter-spacing:-.02em;}
+  .hd p{margin:6px 0 0;font-size:13px;font-weight:500;color:var(--sub);letter-spacing:.01em;}
+
+  /* 卡片 */
+  .card{
+    background:var(--card); border-radius:18px; overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.05), 0 10px 30px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme:dark){
+    .card{box-shadow:none;}
+  }
+
+  /* 输入行 */
+  .field{display:block;padding:13px 18px 15px;transition:background .18s;}
+  .field + .field{border-top:1px solid var(--line);}
+  .field:focus-within{background:color-mix(in srgb, var(--accent) 7%, transparent);}
+  .label{display:flex;align-items:baseline;gap:6px;font-size:13px;font-weight:600;color:var(--sub);}
+  .label em{font-style:normal;font-weight:500;opacity:.65;}
+  .field input{
+    display:block;width:100%;margin-top:1px;padding:0;
+    border:0;outline:0;background:transparent;color:var(--text);
+    font-family:inherit;font-size:41px;font-weight:600;
+    letter-spacing:-.03em;line-height:1.14;
+    font-variant-numeric:tabular-nums;
+  }
+  .field input::placeholder{color:var(--sub);opacity:.3;font-weight:500;}
+
+  /* 提示 */
+  .hint{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    min-height:20px;margin:14px 4px 0;
+    font-size:13px;font-weight:500;color:var(--sub);
+    font-variant-numeric:tabular-nums;
+  }
+  .tag{
+    font-size:11px;font-weight:600;letter-spacing:.03em;
+    padding:3px 7px;border-radius:6px;
+    background:color-mix(in srgb, var(--accent) 14%, transparent);
+    color:var(--accent);
+  }
+
+  /* 对照表 */
+  details.card{margin-top:20px;}
+  summary{
+    display:flex;align-items:center;padding:16px 18px;
+    font-size:15px;font-weight:600;cursor:pointer;list-style:none;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary::after{
+    content:'';width:7px;height:7px;margin-left:auto;margin-top:-4px;
+    border-right:2px solid var(--sub);border-bottom:2px solid var(--sub);
+    transform:rotate(45deg);transition:transform .22s ease;
+  }
+  details[open] summary::after{transform:rotate(-135deg);margin-top:4px;}
+  .tbl-wrap{max-height:52vh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;}
+  th{
+    position:sticky;top:0;z-index:1;background:var(--card);
+    padding:2px 18px 9px;font-size:11px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--sub);text-align:left;
+  }
+  th:last-child{text-align:right;}
+  td{padding:11px 18px;font-size:17px;border-top:1px solid var(--line);}
+  td:last-child{text-align:right;color:var(--sub);}
+  tr.hl td{color:var(--accent);font-weight:600;}
+  tr.hl td:last-child{color:var(--accent);}
+  tbody tr:active{background:var(--line);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hd">
+    <h1>目数 ↔ 微米</h1>
+    <p>美国标准筛 · ASTM E11</p>
+  </header>
+
+  <section class="card">
+    <label class="field">
+      <span class="label">目数 <em>mesh</em></span>
+      <input id="mesh" type="text" inputmode="decimal" enterkeyhint="done"
+             autocomplete="off" autocorrect="off" spellcheck="false" placeholder="—">
+    </label>
+    <label class="field">
+      <span class="label">微米 <em>µm</em></span>
+      <input id="micron" type="text" inputmode="decimal" enterkeyhint="done"
+             autocomplete="off" autocorrect="off" spellcheck="false" placeholder="—">
+    </label>
+  </section>
+
+  <div class="hint" id="hint"></div>
+
+  <details class="card">
+    <summary>常用对照表</summary>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>目数 mesh</th><th>微米 µm</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </details>
+
+</div>
+
+<script>
+/* ---------- 数据：美国标准筛 ASTM E11 ---------- */
+const TABLE = [
+  [3,6730],[3.5,5660],[4,4760],[5,4000],[6,3360],[7,2830],[8,2380],
+  [10,2000],[12,1680],[14,1410],[16,1190],[18,1000],[20,840],[25,710],
+  [30,590],[35,500],[40,420],[45,354],[50,297],[60,250],[70,210],
+  [80,177],[100,149],[120,125],[140,105],[170,88],[200,74],[230,62],
+  [270,53],[325,44],[400,38],[450,32],[500,25],[635,20]
+];
+
+/* ---------- 双对数插值（相邻标准点之间平滑过渡） ---------- */
+const LX = TABLE.map(r => Math.log(r[0]));
+const LY = TABLE.map(r => Math.log(r[1]));
+const LYR = LY.slice().reverse();
+const LXR = LX.slice().reverse();
+
+function logInterp(x, xs, ys){
+  const n = xs.length;
+  if (x <= xs[0]){
+    const s = (ys[1]-ys[0])/(xs[1]-xs[0]);
+    return ys[0] + s*(x-xs[0]);
+  }
+  if (x >= xs[n-1]){
+    const s = (ys[n-1]-ys[n-2])/(xs[n-1]-xs[n-2]);
+    return ys[n-1] + s*(x-xs[n-1]);
+  }
+  let i = 0;
+  while (i < n-2 && xs[i+1] < x) i++;
+  const t = (x - xs[i]) / (xs[i+1] - xs[i]);
+  return ys[i] + t*(ys[i+1]-ys[i]);
+}
+const meshToMicron = m => Math.exp(logInterp(Math.log(m), LX, LY));
+const micronToMesh = u => Math.exp(logInterp(Math.log(u), LYR, LXR));
+
+/* ---------- 数字格式化 ---------- */
+const trimFixed = (n,d) => n.toFixed(d).replace(/\.?0+$/,'');
+function fmt(v){
+  if (!isFinite(v) || v <= 0) return '';
+  if (v >= 100) return String(Math.round(v));
+  if (v >= 10)  return trimFixed(Math.round(v*10)/10, 1);
+  return trimFixed(Math.round(v*100)/100, 2);
+}
+
+/* ---------- DOM ---------- */
+const meshEl   = document.getElementById('mesh');
+const micronEl = document.getElementById('micron');
+const hintEl   = document.getElementById('hint');
+const tbody    = document.getElementById('tbody');
+let lock = false;
+
+/* 生成对照表 */
+TABLE.forEach(([m,u]) => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td>' + m + '</td><td>' + u + '</td>';
+  tr.addEventListener('click', () => {
+    lock = true;
+    meshEl.value = String(m);
+    micronEl.value = String(u);
+    lock = false;
+    updateHint(u);
+    document.querySelector('details').open = false;
+  });
+  tbody.appendChild(tr);
+});
+
+/* 高亮最近的标准筛 */
+function highlight(um){
+  const rows = tbody.children;
+  let best = -1, bd = Infinity;
+  for (let i = 0; i < TABLE.length; i++){
+    const d = Math.abs(Math.log(TABLE[i][1]) - Math.log(um));
+    if (d < bd){ bd = d; best = i; }
+  }
+  for (let i = 0; i < rows.length; i++) rows[i].classList.toggle('hl', i === best);
+}
+
+/* 底部提示 */
+function updateHint(um){
+  if (!(um > 0)){ hintEl.textContent = ''; return; }
+  let best = TABLE[0], bd = Infinity;
+  for (const r of TABLE){
+    const d = Math.abs(Math.log(r[1]) - Math.log(um));
+    if (d < bd){ bd = d; best = r; }
+  }
+  const exact = bd < 0.008;
+  hintEl.innerHTML =
+    '<span class="tag">' + (exact ? '标准筛' : '最接近') + '</span>' +
+    best[0] + ' 目 · ' + best[1] + ' µm';
+  highlight(um);
+}
+
+/* 双向联动 */
+meshEl.addEventListener('input', () => {
+  if (lock) return;
+  const m = parseFloat(meshEl.value);
+  lock = true;
+  if (m > 0){
+    const um = meshToMicron(m);
+    micronEl.value = fmt(um);
+    updateHint(um);
+  } else {
+    micronEl.value = '';
+    updateHint(null);
+  }
+  lock = false;
+});
+
+micronEl.addEventListener('input', () => {
+  if (lock) return;
+  const u = parseFloat(micronEl.value);
+  lock = true;
+  if (u > 0){
+    meshEl.value = fmt(micronToMesh(u));
+    updateHint(u);
+  } else {
+    meshEl.value = '';
+    updateHint(null);
+  }
+  lock = false;
+});
+</script>
+</body>
+</html>
